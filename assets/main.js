@@ -103,8 +103,8 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
         ],
         lineStyle: {
           color: BEAM_COLORS[i % BEAM_COLORS.length],
-          width: 0.9 + glow * 1.2,
-          opacity: 0.32 + glow * 0.42,
+          width: 1.1 + glow * 1.35,
+          opacity: 0.34 + glow * 0.44,
           curveness,
         },
       });
@@ -168,7 +168,7 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
           symbolSize: 2.4,
           color: '#ffffff',
         },
-        data: buildBeamLines(52),
+        data: buildBeamLines(30),
       },
       // 主城市：Lea / lils（发光涟漪 + 名字标签）
       {
