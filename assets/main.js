@@ -82,8 +82,59 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
-  // 两条彩色渐变线：一条暖色（红→金→绿）、一条冷色（青→蓝→紫），对称弧度
-  function buildTwoLines() {
+  // "Memories" 草书连笔笔画关键点（归一化坐标：x 0~78，y 基线 22 / 顶部 8）
+  const WORD_STROKES = [
+    // M（两峰）
+    [0, 22], [1, 8], [7, 18], [13, 8], [13, 22],
+    // e（小环 + 右上出笔）
+    [15, 22], [16, 15], [20, 12.5], [24, 15], [21, 19.5], [20, 22], [24, 17], [27, 17],
+    // m（两拱）
+    [25, 22], [25, 14], [28, 18], [31, 14], [31, 22], [34, 22],
+    // o（环 + 出笔）
+    [34, 22], [34, 14], [38, 12], [42, 14], [42, 22], [38, 24], [34, 22], [45, 17],
+    // r（尖拱 + 竖）
+    [42.5, 22], [43.5, 13], [46.5, 13], [43.5, 14.5], [43.5, 22], [46, 22],
+    // i（竖上挑 + 点）
+    [46, 22], [48, 14], [51, 15], [51, 7.5], [52, 6.5], [53, 7.5], [52, 8.5], [51, 7.5], [51, 15],
+    // e（环 + 出笔）
+    [53, 22], [53, 16], [57, 13], [60, 16], [57, 19.5], [56, 22], [60, 19], [63, 16], [64, 17],
+    // s（蛇形收尾）
+    [62, 22], [64, 15], [69, 15], [65, 22], [61, 23], [65, 19], [69, 16], [74, 15],
+  ];
+
+  // Catmull-Rom 平滑采样
+  function smoothPath(pts, perSeg) {
+    const out = [];
+    const n = pts.length;
+    for (let i = 0; i < n - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(n - 1, i + 2)];
+      for (let s = 0; s < perSeg; s++) {
+        const t = s / perSeg;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        out.push([
+          0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+          0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3),
+        ]);
+      }
+    }
+    out.push(pts[n - 1]);
+    return out;
+  }
+
+  // 单词局部坐标 → 经纬度（地图中部上空：55E~97E, 26N~39N）
+  function wordToGeo(pt) {
+    const lon = 55 + (pt[0] / 78) * 42;
+    const lat = 39 - ((pt[1] - 8) / 16) * 13;
+    return [lon, lat];
+  }
+
+  // 两条线：线1 暖色渐变写前半 "Mem"，线2 冷色渐变反向写后半 "ories"，
+  // 两线在单词两端上下交错（X 形编织），各自连接两座城市
+  function buildWordLines() {
     const gradWarm = new echarts.graphic.LinearGradient(0, 0, 1, 0, [
       { offset: 0, color: '#ff5c8a' },
       { offset: 0.5, color: '#ffc53d' },
@@ -94,31 +145,41 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
       { offset: 0.5, color: '#818cf8' },
       { offset: 1, color: '#e879f9' },
     ]);
+
+    const smooth = smoothPath(WORD_STROKES, 6);
+    const splitIdx = 16 * 6; // "Mem" 结束、"ories" 开始的衔接点
+    const geoFirst = smooth.slice(0, splitIdx + 1).map(wordToGeo);
+    const geoSecond = smooth.slice(splitIdx).map(wordToGeo).reverse();
+
     return [
       {
         coords: [
           [BEIRUT[0], BEIRUT[1]],
+          [46, 40], [55, 38.5],
+          ...geoFirst,
+          [97, 31.5], [106, 31],
           [ZHENGZHOU[0], ZHENGZHOU[1]],
         ],
         lineStyle: {
           color: gradWarm,
-          width: 3.2,
+          width: 3,
           opacity: 0.95,
-          curveness: 0.52,
           shadowBlur: 8,
           shadowColor: 'rgba(255,150,120,0.5)',
         },
       },
       {
         coords: [
-          [BEIRUT[0], BEIRUT[1]],
           [ZHENGZHOU[0], ZHENGZHOU[1]],
+          [106, 39.5], [97, 38.5],
+          ...geoSecond,
+          [55, 32], [46, 31.5],
+          [BEIRUT[0], BEIRUT[1]],
         ],
         lineStyle: {
           color: gradCool,
-          width: 3.2,
+          width: 3,
           opacity: 0.95,
-          curveness: -0.52,
           shadowBlur: 8,
           shadowColor: 'rgba(140,120,255,0.5)',
         },
@@ -169,22 +230,22 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
       ],
     },
     series: [
-      // 两条彩色渐变线（带流动光点）
+      // 两条彩色线交织书写单词 Memories（带流动光点）
       {
         type: 'lines',
         coordinateSystem: 'geo',
         zlevel: 2,
-        polyline: false,
+        polyline: true,
         silent: true,
         effect: {
           show: true,
-          period: 4.5,
+          period: 5,
           trailLength: 0.5,
           symbol: 'circle',
           symbolSize: 3,
           color: '#ffffff',
         },
-        data: buildTwoLines(),
+        data: buildWordLines(),
       },
       // 主城市：Lea / lils（发光涟漪 + 名字标签）
       {
