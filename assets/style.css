@@ -14,6 +14,13 @@
   --sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
+/* 手写体（用于两线交织写成的单词） */
+@font-face {
+  font-family: 'DancingScript';
+  src: url('fonts/DancingScript.ttf') format('truetype');
+  font-display: swap;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body { height: 100%; }
@@ -132,6 +139,36 @@ body {
 }
 #map canvas:active {
   cursor: grabbing;
+}
+
+/* ---------- 两线交织写成的单词 ---------- */
+.word-svg {
+  position: absolute;
+  left: 58%;
+  top: 36%;
+  width: clamp(150px, 20vw, 260px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+  animation: word-in 2.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes word-in {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.92); filter: blur(6px); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+.word-text {
+  font-family: 'DancingScript', cursive;
+  font-size: 128px;
+  font-weight: 700;
+  fill: rgba(247, 233, 200, 0.34);
+  stroke: url(#word-grad);
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 4px rgba(255, 200, 130, 0.6)) drop-shadow(0 0 12px rgba(150, 160, 255, 0.4));
+  letter-spacing: 2px;
 }
 .map-hint {
   position: absolute;
