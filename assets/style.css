@@ -377,16 +377,30 @@ body {
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 720px) {
-  .panel-timer { left: 12px; bottom: 12px; }
-  .panel-album { right: 12px; bottom: 12px; }
-  .panel-timer .panel-glass { padding: 16px 16px 14px; min-width: 178px; }
-  .timer-number { font-size: 54px; }
-  .timer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px 6px; }
+  .panel-timer { left: 10px; bottom: 10px; }
+  .panel-album { right: 10px; bottom: 10px; }
+  .panel-timer .panel-glass { padding: 14px 14px 12px; min-width: 0; }
+  .timer-number { font-size: 46px; }
+  .timer-eyebrow { font-size: 10px; letter-spacing: 0.2em; }
+  .timer-unit { font-size: 10px; letter-spacing: 0.24em; }
+  .timer-divider { margin: 10px 0 8px; }
+  .timer-grid { grid-template-columns: repeat(3, 1fr); gap: 6px 4px; }
+  .stat-value { font-size: 15px; }
+  .stat-label { font-size: 9px; }
+  .timer-since { margin-top: 10px; font-size: 9px; }
+  .panel-glass-album { padding: 10px; }
+  .album-text, .album-arrow { display: none; }
+  .album-icon { width: 42px; height: 42px; border-radius: 12px; }
   .album-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero-title { gap: 10px; }
+  .hero { padding: 20px 12px 4px; }
+  .hero-title { font-size: 26px; gap: 8px; }
+  .hero-kicker { font-size: 9px; letter-spacing: 0.3em; margin-bottom: 10px; }
+  .hero-arabic { margin-top: 8px; font-size: 14px; }
+  .hero-sub { font-size: 11px; letter-spacing: 0.04em; line-height: 1.8; padding: 0 18px; }
+  .foot { font-size: 10.5px; line-height: 1.8; padding: 14px 20px 18px; max-width: 100%; overflow-wrap: anywhere; }
 }
-@media (max-width: 440px) {
-  .panel-album { left: 12px; right: 12px; bottom: 12px; }
-  .panel-timer { left: 12px; right: 12px; bottom: 96px; }
-  .panel-timer .panel-glass { min-width: 0; }
+@media (max-width: 400px) {
+  /* 极窄屏：计时卡片再紧凑一档 */
+  .timer-number { font-size: 40px; }
+  .timer-main { gap: 6px; }
 }
