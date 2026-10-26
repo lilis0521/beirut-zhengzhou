@@ -128,6 +128,8 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
     { name: 'Rio de Janeiro', value: [-43.2, -22.9] },
   ];
 
+  const isNarrow = () => window.innerWidth < 720;
+
   const option = {
     backgroundColor: 'transparent',
     animationDuration: 1400,
@@ -139,7 +141,7 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
       scaleLimit: { min: 1, max: 10 },
       silent: true,
       layoutCenter: ['50%', '52%'],
-      layoutSize: '122%',
+      layoutSize: isNarrow() ? '106%' : '122%',
       itemStyle: {
         areaColor: '#131f3e',
         borderColor: 'rgba(140,180,255,0.28)',
@@ -236,7 +238,11 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
   } catch (err) {
     console.error('chart init failed:', err);
   }
-  window.addEventListener('resize', () => chart.resize());
+  window.addEventListener('resize', () => {
+    chart.resize();
+    // 横竖屏切换/窗口变化时，按宽度调整地图初始尺寸
+    chart.setOption({ geo: { layoutSize: isNarrow() ? '106%' : '122%' } });
+  });
 })();
 
 /* ============================================================
