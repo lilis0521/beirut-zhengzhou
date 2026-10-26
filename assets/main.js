@@ -82,34 +82,48 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
-  // 彩虹色板（按光谱顺序）
-  const BEAM_COLORS = [
-    '#ff5c8a', '#ff7a5c', '#ff9d3b', '#ffc53d', '#ffe066',
-    '#a3e635', '#4ade80', '#2dd4bf', '#38bdf8', '#60a5fa',
-    '#818cf8', '#a78bfa', '#e879f9',
-  ];
-
-  // 光桥：彩虹渐变的弧线束，中间亮、两边淡，弧线自然散开
-  function buildBeamLines(count) {
-    const data = [];
-    for (let i = 0; i < count; i++) {
-      const t = i / (count - 1);
-      const curveness = (t * 2 - 1) * 0.62 + rand(-0.05, 0.05);
-      const glow = 1 - Math.abs(t - 0.5) * 1.15; // 中间 1 → 两边 0.42
-      data.push({
+  // 两条彩色渐变线：一条暖色（红→金→绿）、一条冷色（青→蓝→紫），对称弧度
+  function buildTwoLines() {
+    const gradWarm = new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#ff5c8a' },
+      { offset: 0.5, color: '#ffc53d' },
+      { offset: 1, color: '#4ade80' },
+    ]);
+    const gradCool = new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#38bdf8' },
+      { offset: 0.5, color: '#818cf8' },
+      { offset: 1, color: '#e879f9' },
+    ]);
+    return [
+      {
         coords: [
           [BEIRUT[0], BEIRUT[1]],
           [ZHENGZHOU[0], ZHENGZHOU[1]],
         ],
         lineStyle: {
-          color: BEAM_COLORS[i % BEAM_COLORS.length],
-          width: 1.1 + glow * 1.35,
-          opacity: 0.34 + glow * 0.44,
-          curveness,
+          color: gradWarm,
+          width: 3.2,
+          opacity: 0.95,
+          curveness: 0.52,
+          shadowBlur: 8,
+          shadowColor: 'rgba(255,150,120,0.5)',
         },
-      });
-    }
-    return data;
+      },
+      {
+        coords: [
+          [BEIRUT[0], BEIRUT[1]],
+          [ZHENGZHOU[0], ZHENGZHOU[1]],
+        ],
+        lineStyle: {
+          color: gradCool,
+          width: 3.2,
+          opacity: 0.95,
+          curveness: -0.52,
+          shadowBlur: 8,
+          shadowColor: 'rgba(140,120,255,0.5)',
+        },
+      },
+    ];
   }
 
   // 其他城市参照标注
@@ -155,7 +169,7 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
       ],
     },
     series: [
-      // 彩虹光桥（弧线束 + 流动光点；无阴影模糊，保证缩放流畅）
+      // 两条彩色渐变线（带流动光点）
       {
         type: 'lines',
         coordinateSystem: 'geo',
@@ -164,13 +178,13 @@ const ZHENGZHOU = [113.6254, 34.7466];  // 中国 · 郑州
         silent: true,
         effect: {
           show: true,
-          period: 4.2,
-          trailLength: 0.4,
+          period: 4.5,
+          trailLength: 0.5,
           symbol: 'circle',
-          symbolSize: 2.4,
+          symbolSize: 3,
           color: '#ffffff',
         },
-        data: buildBeamLines(30),
+        data: buildTwoLines(),
       },
       // 主城市：Lea / lils（发光涟漪 + 名字标签）
       {
